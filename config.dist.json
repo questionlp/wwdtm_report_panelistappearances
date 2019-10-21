@@ -1,0 +1,13 @@
+{
+    "database": {
+        "host": "",
+        "user": "",
+        "password": "",
+        "database": "",
+        "port": 3306,
+        "raise_on_warnings": true
+    },
+    "google_analytics_property_code": "",
+    "output_path": "output/",
+    "output_filename": "index.html"
+}
