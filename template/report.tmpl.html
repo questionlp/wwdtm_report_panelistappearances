@@ -32,7 +32,29 @@
             <!-- End Header -->
 
             <div id="results">
-
+            <table class="pure-table pure-table-bordered">
+                <colgroup>
+                    {% for col in range((render_data["show_years"]|length + 2)) %}
+                        <col class="tc{{ col + 1 }}">
+                    {% endfor %}
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>Panelists</th>
+                        {% for year in render_data["show_years"] %}
+                        <th>{{ year }}</th>
+                        {% endfor %}
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for panelist in render_data["appearance_counts"] %}
+                    <tr>
+                        <td class="panelist-name">{{ panelist[""] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
             </div>
 
             <!-- Start Footer -->

@@ -11,7 +11,6 @@ import os
 from typing import List, Dict, Text
 import mysql.connector
 import pytz
-import slugify
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -19,6 +18,27 @@ def retrieve_appearance_counts(database_connection: mysql.connector.connect
                               ) -> Dict:
     """Retrieve all appearance counts for all panelists from the
     database"""
+
+    cursor = database_connection.cursor()
+    query = ("SELECT DISTINCT p.panelistid, p.panelist "
+             "FROM ww_panelists p "
+             "JOIN ww_showpnlmap pm ON pm.panelistid = p.panelistid "
+             "JOIN ww_shows s ON s.showid = pm.panelistid "
+             "WHERE s.bestof = 0 AND s.repeatshowid IS NULL "
+             "ORDER BY p.panelist ASC")
+    cursor.execute(query)
+    result = cursor.fetchall()
+
+    if not result:
+        return None
+
+    panelist_appearances = []
+    for row in result:
+        panelist = OrderedDict()
+        panelist["name"] = row[0]
+        panelist["appearances"] = []
+        panelist_appearances.append(panelist)
+
     cursor = database_connection.cursor(dictionary=True)
     query = ("SELECT p.panelist, YEAR(s.showdate) AS year, "
              "COUNT(p.panelist) AS count FROM ww_showpnlmap pm "
@@ -34,11 +54,9 @@ def retrieve_appearance_counts(database_connection: mysql.connector.connect
     if not result:
         return None
 
-    appearance_counts = OrderedDict()
     for row in result:
-        panelist = row["panelist"]
-        if panelist not in appearance_counts:
-            appearance_counts[panelist] = []
+ 
+
 
         appearance_year = OrderedDict()
         appearance_year["year"] = row["year"]
@@ -110,7 +128,7 @@ def render_report(show_years: List[int],
     render_data["ga_property_code"] = ga_property_code
     render_data["rendered_at"] = rendered_date_time.strftime("%A, %B %d, %Y %H:%M:%S %Z")
 
-    # Render the report
+    # Render the report and write out to output directory
     report = template.render(render_data=render_data)
     return report
 
