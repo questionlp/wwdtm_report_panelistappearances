@@ -6,10 +6,10 @@
     <title>Wait Wait... Don't Tell Me! Panelist Appearances Report</title>
     <!-- Import Pure CSS Base -->
     <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
-    <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono|IBM+Plex+Sans&display=swap" rel="stylesheet">
 
     <!-- Import Custom CSS -->
-    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
 
     <!-- Google Analytics -->
     <script>
@@ -27,7 +27,7 @@
             <!-- Start Header -->
             <div id="header">
                 <h1>Wait Wait Panelist Appearances Report</h1>
-                <h2>Report how many times a panelist has appeared on Wait Wait... Don't Tell Me!, grouped by year</h2>
+                <h2>Report how many times a panelist has appeared, each year, on Wait Wait... Don't Tell Me!</h2>
             </div>
             <!-- End Header -->
 
@@ -48,9 +48,17 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for panelist in render_data["appearance_counts"] %}
+                    {% for panelist in render_data["panelists"] %}
                     <tr>
-                        <td class="panelist-name">{{ panelist[""] }}</td>
+                        <td class="panelist-name">{{ panelist["name"] }}</td>
+                        {% for year in render_data["show_years"] %}
+                            {% if year in panelist["appearances"] %}
+                        <td class="panelist-data">{{ panelist["appearances"][year] }}</td>
+                            {% else %}
+                        <td class="panelist-data no-data">&nbsp;</td>
+                            {% endif %}
+                        {% endfor %}
+                        <td class="panelist-data total">{{ panelist["appearances"]["total"] }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
