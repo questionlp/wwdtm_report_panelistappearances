@@ -190,6 +190,10 @@ def generate_output_files(rendered_report: Text,
     output_path = os.path.join(report_settings["output_directory"],
                                report_settings["output_filename"])
 
+    # Create the output directory if it does not exist
+    if not os.path.isdir(report_settings["output_directory"]):
+        os.mkdir(report_settings["output_directory"])
+
     # Write out the generated report
     with open(output_path, "w") as output_file:
         if output_file.writable():
