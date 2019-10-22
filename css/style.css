@@ -1,14 +1,24 @@
 @media all {
-    body { font-family: "IBM Plex Sans", sans-serif; font-size: 1.1rem; margin: 1.5rem; }
-    h1 { font-size: 1.5rem; }
-    h2 { font-size: 1.33rem; }
-    table.pure-table { margin: 0; }
+    body { font-family: "IBM Plex Sans", sans-serif; margin: 1.5rem; }
+    h1 { font-size: 1.4rem; }
+    h2 { font-size: 1.2rem; }
+    #results { max-height: 80vh; overflow: scroll; }
+    table.pure-table { margin-right: 0.25rem; }
+    table.pure-table th { background-color: skyblue; }
+    td.panelist-name { background-color: gainsboro; font-weight: 400; }
     td.panelist-data { font-family: "IBM Plex Mono", monospace; text-align: center; }
-    td.no-data { background-color: rgba(160, 160, 160, 0.5); }
-    td.total { background-color: lightskyblue; }
-    #footer { margin-top: 1.5rem; }
+    td.no-data { background-color: lightslategray; /* rgba(160, 160, 160, 0.5);*/ }
+    td.total { background-color: gainsboro; font-weight: bold; }
+    #footer { font-size: 0.9rem; margin-top: 1.5rem; }
 }
 
-@media only screen and (max-width: 820px) {
+@media only screen and (max-width: 480px) {
+    html, body { font-size: initial; margin: 0.75rem; }
+    h1 { font-size: 1.2rem; }
+    h2 { font-size: 1.1rem; }
+    #results { font-size: 0.975rem; margin: 0; max-height: 45vh; }
+}
 
+@media print {
+    #results { border: initial; max-height: initial; overflow: initial; }
 }

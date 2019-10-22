@@ -8,6 +8,7 @@ from collections import OrderedDict
 from datetime import datetime
 import json
 import os
+import shutil
 from typing import List, Dict, Text
 import mysql.connector
 import pytz
@@ -66,8 +67,8 @@ def retrieve_all_panelist_appearance_counts(database_connection: mysql.connector
         panelist = {}
         panelist_id = row[0]
         panelist["name"] = row[1]
-        appearances = retrieve_panelist_appearance_counts(panelist_id,
-                                                          database_connection)
+        appearances = retrieve_panelist_appearance_counts(panelist_id=panelist_id,
+                                                          database_connection=database_connection)
         panelist["appearances"] = appearances
         panelists.append(panelist)
 
@@ -95,26 +96,65 @@ def load_config():
     """Load configuration values from configuration file and from
     options passed into script execution"""
 
-    # Read in configuration file
+    # Read in configuration file for default values
     with open("config.json", "r") as config_file:
         config_dict = json.load(config_file)
 
-    # Read in options passed in
+    # Read in options passed in that override values from the config.json file
     parser = argparse.ArgumentParser()
     parser.add_argument("--ga-property-code",
                         dest="ga_property_code",
-                        help="Google Analytics Property Code (overrides config.json)")
+                        type=str,
+                        help="Google Analytics Property Code (default: %(default)s)",
+                        default=config_dict["report"]["ga_property_code"])
+    parser.add_argument("--css-directory",
+                        dest="css_directory",
+                        type=str,
+                        help="Directory where the base CSS stylesheet file is stored "
+                             "(default: %(default)s)",
+                        default=config_dict["report"]["css_directory"])
+    parser.add_argument("--css-filename",
+                        dest="css_filename",
+                        type=str,
+                        help="File name of the report CSS stylesheet file "
+                             "(default: %(default)s)",
+                        default=config_dict["report"]["css_filename"])
+    parser.add_argument("--output-directory",
+                        dest="output_directory",
+                        type=str,
+                        help="Directory where the generated report will be saved "
+                             "(default: %(default)s)",
+                        default=config_dict["report"]["output_directory"])
+    parser.add_argument("--output-filename",
+                        dest="output_filename",
+                        type=str,
+                        help="File name of the generated report will be saved "
+                             "(default: %(default)s)",
+                        default=config_dict["report"]["output_filename"])
     args = parser.parse_args()
 
-    if (not config_dict["google_analytics_property_code"]
-            and args.ga_property_code):
-        config_dict["google_analytics_property_code"] = args.ga_property_code
+    # Override the values from the config.json file if values were set via argparse
+    if args.ga_property_code != config_dict["report"]["ga_property_code"]:
+        config_dict["report"]["ga_property_code"] = args.ga_property_code
+
+    if args.css_directory != config_dict["report"]["css_directory"]:
+        config_dict["report"]["css_directory"] = args.css_directory
+
+    if args.css_filename != config_dict["report"]["css_filename"]:
+        config_dict["report"]["css_filename"] = args.css_filename
+
+    if args.output_directory != config_dict["report"]["output_directory"]:
+        config_dict["report"]["output_directory"] = args.output_directory
+
+    if args.output_filename != config_dict["report"]["output_filename"]:
+        config_dict["report"]["output_filename"] = args.output_filename
 
     return config_dict
 
 def render_report(show_years: List[int],
                   panelists: List[Dict],
-                  ga_property_code: Text) -> Text:
+                  report_settings: Dict
+                  ) -> Text:
     """Render appearances report using Jinja2"""
 
     # Setup Jinja2 Template
@@ -133,12 +173,34 @@ def render_report(show_years: List[int],
     render_data = {}
     render_data["show_years"] = show_years
     render_data["panelists"] = panelists
-    render_data["ga_property_code"] = ga_property_code
+    render_data["settings"] = report_settings
     render_data["rendered_at"] = rendered_date_time.strftime("%A, %B %d, %Y %H:%M:%S %Z")
 
     # Render the report and write out to output directory
     report = template.render(render_data=render_data)
     return report
+
+def generate_output_files(rendered_report: Text,
+                          report_settings: Dict) -> None:
+    """Writes out the generated report file to file in the output directory
+    and copies the base CSS file to the same directory"""
+
+    css_path = os.path.join(report_settings["css_directory"],
+                            report_settings["css_filename"])
+    output_path = os.path.join(report_settings["output_directory"],
+                               report_settings["output_filename"])
+
+    # Write out the generated report
+    with open(output_path, "w") as output_file:
+        if output_file.writable():
+            output_file.write(rendered_report)
+        else:
+            print("Error: {} is not writable".format(output_path))
+
+    # Copy CSS file into output directory
+    shutil.copy2(css_path, report_settings["output_directory"])
+
+    return
 
 def main():
     """Bootstrap database connection, retrieve panelist appearance data,
@@ -149,10 +211,12 @@ def main():
     panelists = retrieve_all_panelist_appearance_counts(database_connection)
     show_years = retrieve_all_years(database_connection)
 
-    rendered_report = render_report(show_years,
-                                    panelists,
-                                    app_config["google_analytics_property_code"])
-    print(rendered_report)
+    rendered_report = render_report(show_years=show_years,
+                                    panelists=panelists,
+                                    report_settings=app_config["report"])
+
+    generate_output_files(rendered_report=rendered_report,
+                          report_settings=app_config["report"])
 
 # Only run if executed as a script and not imported
 if __name__ == '__main__':

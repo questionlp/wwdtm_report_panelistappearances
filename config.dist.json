@@ -7,7 +7,11 @@
         "port": 3306,
         "raise_on_warnings": true
     },
-    "google_analytics_property_code": "",
-    "output_path": "output/",
-    "output_filename": "index.html"
+    "report": {
+        "ga_property_code": "",
+        "css_directory": "css",
+        "css_filename": "style.css",
+        "output_directory": "output",
+        "output_filename": "index.html"
+    }
 }

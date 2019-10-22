@@ -9,12 +9,12 @@
     <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono|IBM+Plex+Sans&display=swap" rel="stylesheet">
 
     <!-- Import Custom CSS -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ render_data['settings']['css_filename'] }}">
 
     <!-- Google Analytics -->
     <script>
     window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-    ga('create', '{{ render_data["ga_property_code"] }}', 'auto');
+    ga('create', '{{ render_data["settings"]["ga_property_code"] }}', 'auto');
     ga('send', 'pageview');
     </script>
     <script async src='https://www.google-analytics.com/analytics.js'></script>
@@ -29,8 +29,7 @@
                 <h1>Wait Wait Panelist Appearances Report</h1>
                 <h2>Report how many times a panelist has appeared, each year, on Wait Wait... Don't Tell Me!</h2>
                 <p>
-                    Note: The numbers listed in the table below do not include panelist appearances in Best Of
-                    or Repeat shows.
+                    Note: The numbers listed below do not include panelist appearances in Best Of or Repeat shows.
                 </p>
             </div>
             <!-- End Header -->
